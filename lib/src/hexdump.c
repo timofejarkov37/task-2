@@ -52,6 +52,35 @@ int is_printable(unsigned char c)
     return (c >= 0x20 && c <= 0x7E);
 }
 
+static void print_group(const unsigned char *buf, int start,
+                       int valid, int group_size)
+{
+    int i;
+    for (i = group_size - 1; i >= 0; i--) {
+        int idx = start + i;
+        if (idx < valid) {
+            char h[2];
+            byte_to_hex(buf[idx], h);
+            putchar(h[0]);
+            putchar(h[1]);
+        } else {
+            putchar('0');
+            putchar('0');
+        }
+    }
+}
+
+static void print_ascii(const unsigned char *buf, int valid)
+{
+    int i;
+    printf(" | ");
+    for (i = 0; i < valid; i++) {
+        if (is_printable(buf[i]))
+            putchar((char)buf[i]);
+        else
+            putchar('.');
+    }
+}
 
 static void print_offset(long pos)
 {
