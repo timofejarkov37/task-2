@@ -94,3 +94,72 @@ static void print_offset(long pos)
     for (i = 0; i < 8; i++)
         putchar(digits[i]);
 }
+
+void print_hex(FILE *fp, const Options *opts)
+{
+    int  group_size = opts->group_size;
+    int  cols       = opts->cols;
+    long pos        = opts->offset;
+    long length     = opts->length;
+
+    int row_bytes = group_size * cols;
+
+    unsigned char *buf = (unsigned char *)malloc((size_t)row_bytes);
+    if (!buf) {
+        fprintf(stderr, "Error: memory allocation failed\n");
+        return;
+    }
+
+    if (fseek(fp, pos, SEEK_SET) != 0) {
+        fprintf(stderr, "Error: cannot seek to offset %ld\n", pos);
+        free(buf);
+        return;
+    }
+
+    long written = 0;
+
+    while (1) {
+        int to_read = row_bytes;
+        if (length >= 0) {
+            long remaining = length - written;
+            if (remaining <= 0) break;
+            if (remaining < to_read) to_read = (int)remaining;
+        }
+
+        int valid = (int)fread(buf, 1, (size_t)to_read, fp);
+        if (valid == 0) break;
+
+        print_offset(pos);
+        printf("  ");
+
+        int ngroups = valid / group_size + (valid % group_size != 0 ? 1 : 0);
+
+        int g;
+        for (g = 0; g < cols; g++) {
+            int byte_pos = g * group_size;
+            if (byte_pos < valid) {
+                print_group(buf, byte_pos, valid, group_size);
+                if (g < cols - 1) {
+                    if (group_size == 1 || g < ngroups - 1)
+                        putchar(' ');
+                }
+            } else if (group_size == 1) {
+                putchar(' ');
+                putchar(' ');
+                if (g < cols - 1) putchar(' ');
+            }
+        }
+
+        if (group_size == 1)
+            print_ascii(buf, valid);
+
+        putchar('\n');
+
+        written += valid;
+        pos     += valid;
+
+        if (valid < to_read) break;
+    }
+
+    free(buf);
+}
