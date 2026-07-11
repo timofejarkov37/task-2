@@ -52,3 +52,16 @@ int is_printable(unsigned char c)
     return (c >= 0x20 && c <= 0x7E);
 }
 
+
+static void print_offset(long pos)
+{
+    char digits[8];
+    int i;
+    unsigned long val = (unsigned long)pos;
+    for (i = 7; i >= 0; i--) {
+        digits[i] = HEX_CHARS[val & 0x0F];
+        val >>= 4;
+    }
+    for (i = 0; i < 8; i++)
+        putchar(digits[i]);
+}
