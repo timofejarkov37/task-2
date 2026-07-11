@@ -163,3 +163,15 @@ void print_hex(FILE *fp, const Options *opts)
 
     free(buf);
 }
+
+int print_file(const char *path, const Options *opts)
+{
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        fprintf(stderr, "Error: cannot open file '%s'\n", path);
+        return -1;
+    }
+    print_hex(fp, opts);
+    fclose(fp);
+    return 0;
+}
