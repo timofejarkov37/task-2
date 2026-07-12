@@ -13,10 +13,10 @@ endif()
 
 option(BUILD_SHARED_LIBS "Build libraries as shared (dynamic)" OFF)
 
-add_library(hexdump_lib lib/hexdump.c)
-target_include_directories(hexdump_lib PUBLIC include)
+add_library(hexdump_lib lib/src/hexdump.c)
+target_include_directories(hexdump_lib PUBLIC lib/include)
 set_target_properties(hexdump_lib PROPERTIES OUTPUT_NAME hexdump)
 
-add_executable(hexdump src/main.c src/getopt.c)
-target_include_directories(hexdump PRIVATE include)
+add_executable(hexdump app/main.c app/getopt.c)
+target_include_directories(hexdump PRIVATE lib/include app)
 target_link_libraries(hexdump PRIVATE hexdump_lib)
