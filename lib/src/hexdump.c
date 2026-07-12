@@ -175,3 +175,38 @@ int print_file(const char *path, const Options *opts)
     fclose(fp);
     return 0;
 }
+
+int print_dir(const char *dir_path, const Options *opts)
+{
+    DIR *dir = opendir(dir_path);
+    if (!dir) {
+        fprintf(stderr, "Error: cannot open directory '%s'\n", dir_path);
+        return -1;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 ||
+            strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        size_t len = strlen(dir_path) + 1 + strlen(entry->d_name) + 1;
+        char *fpath = (char *)malloc(len);
+        if (!fpath) {
+            fprintf(stderr, "Error: memory allocation failed\n");
+            continue;
+        }
+        snprintf(fpath, len, "%s/%s", dir_path, entry->d_name);
+
+        struct stat st;
+        if (stat(fpath, &st) == 0 && S_ISREG(st.st_mode)) {
+            printf("=== %s ===\n", fpath);
+            print_file(fpath, opts);
+        }
+
+        free(fpath);
+    }
+
+    closedir(dir);
+    return 0;
+}
