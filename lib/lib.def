@@ -1,0 +1,9 @@
+LIBRARY hexdump
+EXPORTS
+    options_init
+    byte_to_hex
+    print_hex
+    print_file
+    print_dir
+    is_printable
+    parse_nonneg_long
